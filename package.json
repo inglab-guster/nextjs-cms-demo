@@ -6,14 +6,15 @@
     "scripts": {
         "dev": "node server.js",
         "build": "next build",
-        "start": "next start",
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "start": "NODE_ENV=production PORT=8000 node server.js",
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "export": "next export"
     },
     "keywords": [],
     "author": "",
     "license": "ISC",
+    "@zeit/next-css": "^1.0.1",
     "dependencies": {
-        "@zeit/next-css": "^1.0.1",
         "express": "^4.17.1",
         "isomorphic-unfetch": "^3.0.0",
         "next": "^8.1.0",

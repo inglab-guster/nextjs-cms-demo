@@ -4,21 +4,6 @@ import fetch from 'isomorphic-unfetch'
 
 class Home extends React.Component {
 
-    componentDidMount() {
-        // this.getInitialProps()
-    }
-
-    static async getInitialProps() {
-        const res = await fetch('https://api.tvmaze.com/search/shows?q=batman')
-        const data = await res.json()
-
-        console.log(`Show data fetched. Count: ${data.length}`)
-
-        return {
-            shows: data.map(entry => entry.show)
-        }
-    }
-
     render() {
         return (
             <Layout>
@@ -31,17 +16,19 @@ class Home extends React.Component {
                         </Link>
                         to go about page
                     </div>
-
-                    <ul>
-                        {this.props.shows.map(show => (
-                            <li key={show.id}>
-                                <Link as={`/p/${show.id}`} href={`/post?id=${show.id}`}>
-                                    <a>{show.name}</a>
-                                </Link>
-                            </li>
-                        ))}
-                    </ul>
                 </div>
+
+                <h3 className='m-3'>Upcoming shows</h3>
+                <ul className='list-group'>
+                    {this.props.shows.map(show => (
+                        <li className='list-group-item' key={show.id}>
+                            {/* <Link as={`/p/${show.id}`} href={`/post?id=${show.id}`}> */}
+                            <Link href={`/post?id=${show.id}`}>
+                                <a>{show.name}</a>
+                            </Link>
+                        </li>
+                    ))}
+                </ul>
             </Layout>
         )
     }

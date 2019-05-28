@@ -10,13 +10,24 @@ app
     .then(() => {
         const server = express()
 
+        // Server-side rendering an API
+        // server.get('/p/:id', (req, res) => {
+        server.get('/post?id=:id', (req, res) => {
+            const actualPage = '/post'
+            const queryParams = { id: req.params.id }
+            app.render(req, res, actualPage, queryParams)
+        })
+
+        // Handle all requests as usual
         server.get('*', (req, res) => {
             return handle(req, res)
         })
 
-        server.listen(3000, err => {
+        // Listen to port
+        let port = process.env.PORT || 3000
+        server.listen(port, err => {
             if (err) throw err
-            console.log('> Ready on http://localhost:3000')
+            console.log(`> Ready on http://localhost:${port}`)
         })
     })
     .catch(ex => {
