@@ -1,6 +1,6 @@
 const withCSS = require('@zeit/next-css')
 module.exports = withCSS({
-    cssModules: true,
+    cssModules: true
     // exportPathMap: async function (defaultPathMap) {
     //     return {
     //         '/': { page: '/' },

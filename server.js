@@ -1,10 +1,10 @@
 const express = require('express')
 const next = require('next')
 const dev = process.env.NODE_ENV !== 'production'
-const app = next({ dev })
+const app = next({ dir: './src', dev })
 const handle = app.getRequestHandler()
-const http = require('http')
 const cookieParser = require('cookie-parser');
+const axios = require('axios')
 
 app
     .prepare()
@@ -13,7 +13,6 @@ app
         server.use(cookieParser())
 
         // Server-side rendering an API
-        // server.get('/p/:id', (req, res) => {
         // server.get('/post*', async (req, res) => {
         //     var actualPage = '/post'
         //     var queryParams = { id: req.params.id }
@@ -37,24 +36,50 @@ app
         })
 
         // Handle all requests as usual
-        server.get('*', (req, res) => {
+        server.get('*', async (req, res) => {
             // bypass these kinds of url
-            console.log('URL: ', req.url)
-            if (req.url.startsWith('/_next') || req.url.endsWith('.css') || req.url.endsWith('.js') || 
+            if (req.url.startsWith('/_next') || req.url.endsWith('.css') || req.url.endsWith('.js') ||
                 req.url.endsWith('.ico') || req.url.endsWith('.jpg') || req.url.endsWith('.png') ||
                 req.url.endsWith('.html') || req.url.endsWith('.json')) {
                 return handle(req, res)
             }
 
-            // validate access token
             const token = req.cookies.token
-            if (!token) {
-                console.log('Invalid token, logging out')
-                res.redirect('/login')
-                return
+
+            // validate access token
+            var requestHandled = false
+            await axios.post(`http://localhost:8080/token/auth`, {}, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            }).then(res => {
+                console.log('token auth success')
+            }).catch(e => {
+                const status = (e && e.response) ? e.response.status : 200
+                console.log('token auth failed: ', status)
+
+                switch (status) {
+                    case 401: {
+                        res.redirect('/logout')
+                        requestHandled = true
+                        break
+                    }
+                    case 403: {
+                        app.render(req, res, '/')
+                        requestHandled = true
+                        break
+                    }
+                }
+            })
+            // if (!token) {
+            //     console.log('Invalid token, logging out')
+            //     res.redirect('/login')
+            //     return
+            // }
+
+            if (!requestHandled) {
+                return handle(req, res)
             }
-            
-            return handle(req, res)
         })
 
         // Listen to port

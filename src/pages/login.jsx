@@ -2,6 +2,7 @@ import HeadlessLayout from "./headless-layout";
 import Router from 'next/router'
 import fetch from 'isomorphic-unfetch'
 import css from '../static/css/login.css'
+import Apis from "../services/apis";
 
 class Login extends React.Component {
 
@@ -19,49 +20,29 @@ class Login extends React.Component {
         super(props)
     }
 
-    componentDidMount() {
-        // check if user is login
-        const token = window.localStorage.getItem('token')
-        if (token) {
-            Router.push('/')
-        }
-    }
-
     async onSubmit(e) {
         e.preventDefault()
-        console.log(this.state)
 
         this.setState({ isLoading: true })
 
         // login
-        var res = await fetch('http://localhost:8080/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                "username": this.state.username,
-                "password": this.state.password,
-                "grantType": "password"
-            })
-        })
+        await Apis.login(this.state.username, this.state.password).then(res => {
+            this.setState({ isLoading: false })
 
-        this.setState({ isLoading: false })
+            // save the access token
+            const body = res.data
+            window.localStorage.setItem('token', JSON.stringify(body))
+            document.cookie = `token=${body.accessToken}`
 
-        // login failture, show the error message
-        if (res.status != 200) {
-            const error = await res.json()
-            this.setState({ error: error.message })
+            // go to home page after login
+            Router.push('/')
             return
-        }
 
-        // save the access token
-        const body = await res.json()
-        window.localStorage.setItem('token', JSON.stringify(body))
-        document.cookie = `token=${body.accessToken}`
-
-        // go to home page after login
-        Router.push('/')
+        }).catch(e => {
+            // login failture, show the error message
+            this.setState({ isLoading: false })
+            this.setState({ error: e.response.data.message })
+        })
     }
 
     render() {
