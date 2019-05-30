@@ -6,6 +6,11 @@ const linkStyle = {
 }
 
 class Header extends React.Component {
+
+    logout() {
+        window.localStorage.removeItem('token')
+    }
+
     render() {
         return (
             <div className='p-4 header'>
@@ -14,6 +19,9 @@ class Header extends React.Component {
                 </Link>
                 <Link href="/about">
                     <a style={linkStyle}>About</a>
+                </Link>
+                <Link href="/logout">
+                    <a style={linkStyle} onClick={this.logout.bind(this)}>Sign Out</a>
                 </Link>
             </div>
         )
